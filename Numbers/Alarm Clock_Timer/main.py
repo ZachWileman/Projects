@@ -14,9 +14,24 @@ while True:
     # Timer
     if choice == 't':
 
-        # Gets user input for timer
-        tmr = int(input('\nPlease enter the time for the timer in seconds. ' +
-        'Ex:(15): '))
+        while True:
+            # Gets user input for timer as well as validates the user's input
+            try:
+                tmr = int(input('\nPlease enter the time for the timer in ' +
+                'seconds. Ex:(15) NOTE: Needs to be an integer:  '))
+
+            # If the user doesn't enter an integer
+            except ValueError:
+                print('Please enter a valid number.')
+
+            else:
+                # If the value is below 0
+                if tmr < 0:
+                    print('Please enter a valid number.')
+                
+                # Otherwise, breaks from the loop since the input is valid
+                else:
+                    break
         
         # Waits user specified amount of time, then alarm sounds
         while tmr:
