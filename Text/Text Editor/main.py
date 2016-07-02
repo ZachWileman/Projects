@@ -2,19 +2,18 @@
 # documents. Optional: Add syntax highlighting and other features.
 
 from tkinter import * # Module used for creating GUI
+import tkinter.scrolledtext as tkst
 
 #Temporary function for different commands
 def doNothing():
     print('do nothing function')
-
-# Creates the window
+ 
+# Creates the window & title
 window = Tk()
-
-frame = Frame(window, width=300, height=300)
-frame.pack()
+window.title('Text Editor')
 
 # Creates a toolbar
-menuBar = Menu(frame)
+menuBar = Menu(master=window)
 window.config(menu=menuBar)
 
 # Creating File submenu
@@ -39,14 +38,9 @@ editMenu.add_command(label='Delete', command=doNothing)
 editMenu.add_separator()
 editMenu.add_command(label='Select All', command=doNothing)
 
-# Creating Scrollbar
-scrollBar = Scrollbar(frame)
-scrollBar.pack(side=RIGHT, fill=Y)
-
-# Creating text window
-text = Text(frame, wrap=WORD)
-text.config(yscrollcommand=scrollBar.set)
-text.pack(side=LEFT)
+# Creating text window & scrollbar
+textBox = tkst.ScrolledText(window, wrap=WORD)
+textBox.pack(fill=BOTH, expand=1)
 
 # Keeps the window from closing
 window.mainloop()
