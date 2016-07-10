@@ -3,8 +3,11 @@
 
 from tkinter import * # Module used for creating GUI
 import tkinter.scrolledtext as tkst
-from tkinter.filedialog import askopenfilename
+from tkinter.filedialog import askopenfilename, asksaveasfilename
+from tkinter.messagebox import askquestion, showerror
 import sys
+
+currentFile = ''
 
 #Temporary function for different commands
 def doNothing():
@@ -12,8 +15,41 @@ def doNothing():
 
 # Exit function
 def exitProgram():
-    # *********************Need to add check for if user wants to save file
-    pass
+    # ********************* Need to check for changes to file before asking user
+    # ********************* to save
+    global currentFile
+    choice = ''
+
+    if currentFile:
+        choice = askquestion('Text Editor', 'Do you want to save changes to ' +
+                             currentFile + '?')
+    else:
+        choice = askquestion('Text Editor', 'Do you want to save changes to' +
+                             ' Untitled?')
+
+    if choice == 'yes':
+        save()
+
+    sys.exit()
+
+# Used for saving to a new file (or optionally the same file)
+def saveAs():
+    fileName = asksaveasfilename()
+
+    if fileName:
+        contents = textBox.get('1.0', 'end-1c')
+        with open(fileName, 'w') as f:
+            f.write(contents)
+
+# Save the current file
+def save():
+    global currentFile
+    if currentFile:
+        contents = textBox.get('1.0', 'end-1c')
+        with open(currentFile, 'w') as f:
+            f.write(contents)
+    else:
+        saveAs()
 
 # Open file function
 def openFile():
@@ -38,15 +74,18 @@ def openFile():
             with open(fileName) as f:
                 contents = f.read()
                 textBox.insert('1.0', contents)
+            global currentFile
+            currentFile = fileName
         except:
-            print('An error occured when trying to open the file.')
+            currentFile = ''
+            showerror('Error!', 'Unable to open file.')
  
 # Creates the window & title
 window = Tk()
 window.title('Text Editor')
 
 # Creates a toolbar
-menuBar = Menu(master=window)
+menuBar = Menu(window)
 window.config(menu=menuBar)
 
 # Creating File submenu
@@ -54,10 +93,14 @@ fileMenu = Menu(menuBar, tearoff=0)
 menuBar.add_cascade(label='File', menu=fileMenu)
 fileMenu.add_command(label='New', command=doNothing)
 fileMenu.add_command(label='Open', command=openFile)
-fileMenu.add_command(label='Save', command=doNothing)
-fileMenu.add_command(label='Save as...', command=doNothing)
+fileMenu.add_command(label='Save', command=save)
+fileMenu.add_command(label='Save as...', command=saveAs)
 fileMenu.add_separator()
 fileMenu.add_command(label='Exit', command=exitProgram)
+
+# Adding protocol for if user hits the close button in the top right corner
+# rather than than using the exit button.
+window.protocol('WM_DELETE_WINDOW', exitProgram)
 
 # Creating Edit submenu
 editMenu = Menu(menuBar, tearoff=0)
