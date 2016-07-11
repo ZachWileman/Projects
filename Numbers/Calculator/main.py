@@ -1,6 +1,7 @@
 # Calculator - A simple calculator to do basic operators. Make it a scientific
 # calculator for added complexity.
 
+# Program developed using Python 3.4.4
 
 # Used to check if a valid number was entered
 def isfloat(num):

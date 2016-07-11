@@ -1,6 +1,8 @@
 # Fibonacci Sequence - Enter a number and have the program generate the
 # Fibonacci sequence to that number or to the Nth number.
 
+# Program developed using Python 3.4.4
+
 #Used for determining fibonacci
 def getFib (fib, prevNum, nextNum, sequence):
 	

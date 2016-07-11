@@ -1,6 +1,8 @@
 # Alarm Clock/Timer - A simple clock where it plays a sound after X number of
 # minutes/seconds or at a particular time.
 
+# Program developed using Python 3.4.4
+
 import time
 import re
 import winsound

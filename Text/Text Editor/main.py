@@ -1,6 +1,8 @@
 # Text Editor - Notepad style application that can open, edit, and save text
 # documents. Optional: Add syntax highlighting and other features.
 
+# Program developed using Python 3.4.4
+
 from tkinter import * # Module used for creating GUI
 import tkinter.scrolledtext as tkst
 from tkinter.filedialog import askopenfilename, asksaveasfilename
@@ -13,12 +15,8 @@ currentFile = ''
 def doNothing():
     print('do nothing function')
 
-# Exit function
-def exitProgram():
-    # ********************* Need to check for changes to file before asking user
-    # ********************* to save
+def checkSave():
     global currentFile
-    choice = ''
 
     if currentFile:
         choice = askquestion('Text Editor', 'Do you want to save changes to ' +
@@ -26,9 +24,15 @@ def exitProgram():
     else:
         choice = askquestion('Text Editor', 'Do you want to save changes to' +
                              ' Untitled?')
+    return choice
 
-    if choice == 'yes':
-        save()
+# Exit function
+def exitProgram():
+    if textBox.edit_modified():
+        choice = checkSave()
+
+        if choice == 'yes':
+            save()
 
     sys.exit()
 
@@ -38,21 +42,39 @@ def saveAs():
 
     if fileName:
         contents = textBox.get('1.0', 'end-1c')
-        with open(fileName, 'w') as f:
-            f.write(contents)
+        try:
+            with open(fileName, 'w') as f:
+                f.write(contents)
+            textBox.edit_modified(False)
+        except:
+            showerror('Error!', 'Unable to open file.')
 
 # Save the current file
 def save():
     global currentFile
+
     if currentFile:
         contents = textBox.get('1.0', 'end-1c')
-        with open(currentFile, 'w') as f:
-            f.write(contents)
+        try:
+            with open(currentFile, 'w') as f:
+                f.write(contents)
+            textBox.edit_modified(False)
+        except:
+            showerror('Error!', 'Unable to open file.')
     else:
         saveAs()
 
 # Open file function
 def openFile():
+    global currentFile
+
+    if textBox.edit_modified():
+        choice = checkSave()
+
+        if choice == 'yes':
+            save()
+            return
+
     fileName = askopenfilename(
         filetypes=[('All Files', '*.*')],
         title = 'Choose A File'
@@ -63,19 +85,18 @@ def openFile():
     # to the last character itself. The -1c extension effectively strips the
     # trailing \n that this widget adds to its contents (and which may add a
     # blank line if saved in a file). Source: [O`Reilly] - Programming Python,
-    # 4th ed. For this function, END+'-1c' or 'end-1c' do the same thing.
-    if len(textBox.get('1.0', 'end-1c')):
-        textBox.delete('1.0', END)
-        #*********** Need to add check for if there is a file open before it
-        #*********** clears the text editor.
+    # 4th ed. For this function(below), END+'-1c' or 'end-1c' do the same thing.
 
     if fileName:
+        if len(textBox.get('1.0', 'end-1c')):
+            textBox.delete('1.0', 'end-1c')
+
         try:
             with open(fileName) as f:
                 contents = f.read()
                 textBox.insert('1.0', contents)
-            global currentFile
             currentFile = fileName
+            textBox.edit_modified(False)
         except:
             currentFile = ''
             showerror('Error!', 'Unable to open file.')

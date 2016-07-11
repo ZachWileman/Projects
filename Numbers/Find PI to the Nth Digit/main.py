@@ -1,6 +1,8 @@
 #Find PI to the Nth Digit - Enter a number and have the program generate PI up
 #to that many decimal places. Keep a limit to how far the program will go.
 
+# Program developed using Python 3.4.4
+
 import math
 
 keepGoing = True
