@@ -15,6 +15,39 @@ currentFile = ''
 def doNothing():
     print('do nothing function')
 
+def cut(event=None):
+    text = textBox.get(SEL_FIRST, SEL_LAST)
+    text.delete(SEL_FIRST, SEL_LAST)
+    clipboard_clear()
+    clipboard_append(text)
+
+def copy(event=None):
+    text = textBox.get(SEL_FIRST, SEL_LAST)
+    clipboard_clear()
+    clipboard_append(text)
+
+def paste(event=None):
+    try:
+        text = selection_get(selection='CLIPBOARD')
+        textBox.insert(text)
+    except:
+        # Used for if the clipboard is empty
+        pass
+
+def newFile(event=None):
+    global currentFile
+
+    if textBox.edit_modified():
+        choice = checkSave()
+
+        if choice == 'yes':
+            save()
+            return
+    
+    textBox.delete('1.0', 'end-1c')
+    currentFile = ''
+    textBox.edit_modified(False)
+
 def checkSave():
     global currentFile
 
@@ -37,7 +70,7 @@ def exitProgram():
     sys.exit()
 
 # Used for saving to a new file (or optionally the same file)
-def saveAs():
+def saveAs(event=None):
     fileName = asksaveasfilename()
 
     if fileName:
@@ -50,7 +83,7 @@ def saveAs():
             showerror('Error!', 'Unable to open file.')
 
 # Save the current file
-def save():
+def save(event=None):
     global currentFile
 
     if currentFile:
@@ -65,7 +98,7 @@ def save():
         saveAs()
 
 # Open file function
-def openFile():
+def openFile(event=None):
     global currentFile
 
     if textBox.edit_modified():
@@ -88,8 +121,7 @@ def openFile():
     # 4th ed. For this function(below), END+'-1c' or 'end-1c' do the same thing.
 
     if fileName:
-        if len(textBox.get('1.0', 'end-1c')):
-            textBox.delete('1.0', 'end-1c')
+        textBox.delete('1.0', 'end-1c')
 
         try:
             with open(fileName) as f:
@@ -112,10 +144,11 @@ window.config(menu=menuBar)
 # Creating File submenu
 fileMenu = Menu(menuBar, tearoff=0)
 menuBar.add_cascade(label='File', menu=fileMenu)
-fileMenu.add_command(label='New', command=doNothing)
-fileMenu.add_command(label='Open', command=openFile)
-fileMenu.add_command(label='Save', command=save)
-fileMenu.add_command(label='Save as...', command=saveAs)
+fileMenu.add_command(label='New', command=newFile, accelerator='Ctrl+N')
+fileMenu.add_command(label='Open', command=openFile, accelerator='Ctrl+O')
+fileMenu.add_command(label='Save', command=save, accelerator='Ctrl+S')
+fileMenu.add_command(label='Save as...', command=saveAs, 
+                     accelerator='Ctrl+Shift+S')
 fileMenu.add_separator()
 fileMenu.add_command(label='Exit', command=exitProgram)
 
@@ -128,9 +161,9 @@ editMenu = Menu(menuBar, tearoff=0)
 menuBar.add_cascade(label='Edit', menu=editMenu)
 editMenu.add_command(label='Undo', command=doNothing)
 editMenu.add_separator()
-editMenu.add_command(label='Cut', command=doNothing)
-editMenu.add_command(label='Copy', command=doNothing)
-editMenu.add_command(label='Paste', command=doNothing)
+editMenu.add_command(label='Cut', command=cut, accelerator='Ctrl+X')
+editMenu.add_command(label='Copy', command=copy, accelerator='Ctrl+C')
+editMenu.add_command(label='Paste', command=paste, accelerator='Ctrl+V')
 editMenu.add_command(label='Delete', command=doNothing)
 editMenu.add_separator()
 editMenu.add_command(label='Select All', command=doNothing)
@@ -138,6 +171,15 @@ editMenu.add_command(label='Select All', command=doNothing)
 # Creating text window & scrollbar
 textBox = tkst.ScrolledText(window, wrap=WORD)
 textBox.pack(fill=BOTH, expand=1)
+
+# Creating key bindings
+window.bind('<Control-n>', newFile)
+window.bind('<Control-o>', openFile)
+window.bind('<Control-s>', save)
+window.bind('<Control-Shift-S>', saveAs) # SIDE-NOTE: You need the captil 'S'
+window.bind('<Control-x>', cut)           # here because of holding down shift
+window.bind('<Control-c>', copy)
+window.bind('<Control-v>', paste)
 
 # Keeps the window from closing
 window.mainloop()
