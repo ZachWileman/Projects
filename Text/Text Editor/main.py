@@ -11,9 +11,33 @@ import sys
 
 currentFile = ''
 
-#Temporary function for different commands
-def doNothing():
-    print('do nothing function')
+def selectAll(event=None):
+    try:
+        textBox.add_tag(SEL_FIRST, SEL_LAST)
+    except:
+        # Nothing to select
+        pass
+
+def undo(event=None):
+    try:
+        textBox.edit_undo()
+    except:
+        # Nothing to undo
+        pass
+
+def redo(event=None):
+    try:
+        textBox.edit_redo()
+    except:
+        # Nothing to redo
+        pass
+
+def deleteText(event=None):
+    try:
+        text = textBox.get(SEL_FIRST, SEL_LAST)
+        textBox.delete(SEL_FIRST, SEL_LAST)
+    except:
+        pass
 
 def cut(event=None):
     try:
@@ -167,17 +191,19 @@ window.protocol('WM_DELETE_WINDOW', exitProgram)
 # Creating Edit submenu
 editMenu = Menu(menuBar, tearoff=0)
 menuBar.add_cascade(label='Edit', menu=editMenu)
-editMenu.add_command(label='Undo', command=doNothing)
+editMenu.add_command(label='Undo', command=undo, accelerator='Ctrl+Z')
+editMenu.add_command(label='Redo', command=redo, accelerator='Ctrl-Y')
 editMenu.add_separator()
 editMenu.add_command(label='Cut', command=cut, accelerator='Ctrl+X')
 editMenu.add_command(label='Copy', command=copy, accelerator='Ctrl+C')
 editMenu.add_command(label='Paste', command=paste, accelerator='Ctrl+V')
-editMenu.add_command(label='Delete', command=doNothing)
+editMenu.add_command(label='Delete', command=deleteText, accelerator='Del')
 editMenu.add_separator()
-editMenu.add_command(label='Select All', command=doNothing)
+editMenu.add_command(label='Select All', command=selectAll,
+                     accelerator='Ctrl+A')
 
 # Creating text window & scrollbar
-textBox = tkst.ScrolledText(window, wrap=WORD)
+textBox = tkst.ScrolledText(window, wrap=WORD, undo=True)
 textBox.pack(fill=BOTH, expand=1)
 
 # Creating key bindings
@@ -185,9 +211,13 @@ window.bind('<Control-n>', newFile)
 window.bind('<Control-o>', openFile)
 window.bind('<Control-s>', save)
 window.bind('<Control-Shift-S>', saveAs) # SIDE-NOTE: You need the captil 'S'
-window.bind('<Control-x>', cut)           # here because of holding down shift
+window.bind('<Control-x>', cut)          # here because of holding down shift
 window.bind('<Control-c>', copy)
 window.bind('<Control-v>', paste)
+window.bind('<Delete>', deleteText)
+window.bind('<Control-z>', undo)
+window.bind('<Control-y>', redo)
+window.bind('<Control-a>', selectAll)
 
 # Keeps the window from closing
 window.mainloop()
