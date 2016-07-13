@@ -16,15 +16,23 @@ def doNothing():
     print('do nothing function')
 
 def cut(event=None):
-    text = textBox.get(SEL_FIRST, SEL_LAST)
-    text.delete(SEL_FIRST, SEL_LAST)
-    clipboard_clear()
-    clipboard_append(text)
+    try:
+        text = textBox.get(SEL_FIRST, SEL_LAST)
+        textBox.delete(SEL_FIRST, SEL_LAST)
+        window.clipboard_clear()
+        window.clipboard_append(text)
+    except:
+        # Done to avoid errors in the console; not really necessary.
+        pass
 
 def copy(event=None):
-    text = textBox.get(SEL_FIRST, SEL_LAST)
-    clipboard_clear()
-    clipboard_append(text)
+    try:
+        text = textBox.get(SEL_FIRST, SEL_LAST)
+        window.clipboard_clear()
+        window.clipboard_append(text)
+    except:
+        # Done to avoid errors in the console; not really necessary.
+        pass
 
 def paste(event=None):
     try:
