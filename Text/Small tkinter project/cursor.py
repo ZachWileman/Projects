@@ -1,6 +1,9 @@
 # Program that allows the user to click inside the window and change their
 # current cursor while inside the window.
 
+# This program is just a part of me learning how to use the tkinter module for
+# building a text editor
+
 # Program developed using Python 3.4.4
 
 from tkinter import * # Module used for creating GUI
