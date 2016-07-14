@@ -11,6 +11,9 @@ import sys
 
 currentFile = ''
 
+def rightClickMenu(event):
+    editMenu.post(event.x_root, event.y_root)
+
 def selectAll(event=None):
     try:
         textBox.add_tag(SEL_FIRST, SEL_LAST)
@@ -34,34 +37,40 @@ def redo(event=None):
 
 def deleteText(event=None):
     try:
-        text = textBox.get(SEL_FIRST, SEL_LAST)
         textBox.delete(SEL_FIRST, SEL_LAST)
     except:
+        # In case no text is selected
         pass
 
 def cut(event=None):
     try:
+        # Attempts to copy the selected text to the clipboard and also delete
+        # the selected text.
         text = textBox.get(SEL_FIRST, SEL_LAST)
         textBox.delete(SEL_FIRST, SEL_LAST)
         window.clipboard_clear()
         window.clipboard_append(text)
     except:
-        # Done to avoid errors in the console; not really necessary.
+        # Used for if no text is selected
         pass
 
 def copy(event=None):
     try:
+        # Attempts to copy the selected text to the clipboard
         text = textBox.get(SEL_FIRST, SEL_LAST)
         window.clipboard_clear()
         window.clipboard_append(text)
     except:
-        # Done to avoid errors in the console; not really necessary.
+        # Used for if no text is selected
         pass
 
 def paste(event=None):
     try:
-        text = selection_get(selection='CLIPBOARD')
-        textBox.insert(text)
+        # Attempts to get any text from the clipboard, deletes any text if
+        # selected, and then inserts text at current cursor position.
+        text = textBox.clipboard_get()
+        textBox.delete(SEL_FIRST, SEL_LAST)
+        textBox.insert('insert', text)
     except:
         # Used for if the clipboard is empty
         pass
@@ -69,6 +78,10 @@ def paste(event=None):
 def newFile(event=None):
     global currentFile
 
+    # Checks if the textBox had modified since the last save. If it has, it
+    # checks if the user would like to save. If so, it saves and returns.
+    # Otherwise, clears the current textBox and then resets currentFile and
+    # textBox.edit_modified. 
     if textBox.edit_modified():
         choice = checkSave()
 
@@ -83,6 +96,8 @@ def newFile(event=None):
 def checkSave():
     global currentFile
 
+    # Asks the user if they want to save; question changes depending on if the
+    # user has a new file or existing file open.
     if currentFile:
         choice = askquestion('Text Editor', 'Do you want to save changes to ' +
                              currentFile + '?')
@@ -93,6 +108,8 @@ def checkSave():
 
 # Exit function
 def exitProgram():
+    # Checks if the textBox had modified since the last save. If it has, it
+    # checks if the user would like to save and then exits.
     if textBox.edit_modified():
         choice = checkSave()
 
@@ -103,13 +120,21 @@ def exitProgram():
 
 # Used for saving to a new file (or optionally the same file)
 def saveAs(event=None):
+    # Pops open the save as window and gets a file directory to save to
     fileName = asksaveasfilename()
 
+    # If the user enters a filename
     if fileName:
+
+        # Then grabs the content of the current textBox and attempts to save it
+        # to the entered filename.
         contents = textBox.get('1.0', 'end-1c')
         try:
             with open(fileName, 'w') as f:
                 f.write(contents)
+            
+            # Resets the textBox so it is identified as having not been modified
+            # yet.
             textBox.edit_modified(False)
         except:
             showerror('Error!', 'Unable to open file.')
@@ -118,14 +143,21 @@ def saveAs(event=None):
 def save(event=None):
     global currentFile
 
+    # If the user has a file open already, it will attempt to save to that file.
     if currentFile:
         contents = textBox.get('1.0', 'end-1c')
         try:
             with open(currentFile, 'w') as f:
                 f.write(contents)
+            
+            # Resets the textBox so it is identified as having not been modified
+            # yet.
             textBox.edit_modified(False)
         except:
             showerror('Error!', 'Unable to open file.')
+
+    # If the user hits the save button while having a new file open, it will
+    # revert to the saveAs function
     else:
         saveAs()
 
@@ -133,6 +165,8 @@ def save(event=None):
 def openFile(event=None):
     global currentFile
 
+    # Checks if the current file has been modified. If so, checks if the user
+    # would like to save the file
     if textBox.edit_modified():
         choice = checkSave()
 
@@ -140,6 +174,7 @@ def openFile(event=None):
             save()
             return
 
+    # Asks for the file to open from the user
     fileName = askopenfilename(
         filetypes=[('All Files', '*.*')],
         title = 'Choose A File'
@@ -152,6 +187,10 @@ def openFile(event=None):
     # blank line if saved in a file). Source: [O`Reilly] - Programming Python,
     # 4th ed. For this function(below), END+'-1c' or 'end-1c' do the same thing.
 
+    # If the user selected a file and the current file has been to set to non-
+    # modified (textBox.edit_modified(False)), then it deletes the text from the
+    # current textBox and then attempts copy over the contents from fileName
+    # and add it to the textBox
     if fileName:
         textBox.delete('1.0', 'end-1c')
 
@@ -159,10 +198,12 @@ def openFile(event=None):
             with open(fileName) as f:
                 contents = f.read()
                 textBox.insert('1.0', contents)
+            
+            # Resets the textBox so it is identified as having not been modified
+            # yet and also sets the currentFile.
             currentFile = fileName
             textBox.edit_modified(False)
         except:
-            currentFile = ''
             showerror('Error!', 'Unable to open file.')
  
 # Creates the window & title
@@ -218,6 +259,7 @@ window.bind('<Delete>', deleteText)
 window.bind('<Control-z>', undo)
 window.bind('<Control-y>', redo)
 window.bind('<Control-a>', selectAll)
+window.bind('<Button-3>', rightClickMenu)
 
 # Keeps the window from closing
 window.mainloop()
